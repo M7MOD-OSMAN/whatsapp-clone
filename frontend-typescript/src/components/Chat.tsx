@@ -7,19 +7,32 @@ import { Avatar, IconButton } from "@mui/material";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { nanoid } from "@reduxjs/toolkit";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store";
+import { resetUser } from "../store/user";
 
 interface Message {
   uuid: string;
   text: string;
+  receiverEmail: string;
   fromOtherSide: boolean;
 }
 
 const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState("");
+  const dispatch = useDispatch();
   const socketRef = useRef<Socket>();
+  const currentUserEmail = useSelector(
+    (state: RootState) => state.currentUser.email
+  );
   useEffect(() => {
-    socketRef.current = io(process.env.REACT_APP_SERVER_URL!);
+    socketRef.current = io(process.env.REACT_APP_SERVER_URL!, {
+      query: {
+        email: currentUserEmail,
+      },
+      withCredentials: true,
+    });
     const socket = socketRef.current;
     socket.on("message", (newMessage) => {
       setMessages((oldMessages) => [
@@ -27,14 +40,20 @@ const Chat = () => {
         { ...newMessage, fromOtherSide: true },
       ]);
     });
+    socket.on("connect_error", (err) => {
+      if (err.message === "auth_error") {
+        dispatch(resetUser());
+      }
+    });
     return () => {
       socketRef.current?.disconnect();
     };
-  }, []);
+  }, [currentUserEmail, dispatch]);
   const handleSendMessage = (ev: FormEvent) => {
     ev.preventDefault();
     const newMessage = {
       text: messageInput,
+      receiverEmail: currentUserEmail,
       uuid: nanoid(),
     } as Message;
     socketRef.current?.emit("message", newMessage);
