@@ -4,16 +4,16 @@ import userReducer from "./user";
 
 export const store = configureStore({
   reducer: {
-    currentUser: userReducer,
+    user: userReducer,
   },
   middleware(getDefaultMiddleware) {
     return getDefaultMiddleware().concat(
       save({
-        states: ["currentUser"],
+        states: ["user"],
       })
     );
   },
-  preloadedState: load({ states: ["currentUser"] }),
+  preloadedState: load({ states: ["user"] }),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setUser } from "../store/user";
+import { setCurrentUser } from "../store/user";
 
 const Login = () => {
   const [error, setError] = useState("");
@@ -11,7 +11,7 @@ const Login = () => {
     try {
       await axios.post("/login", details);
       dispatch(
-        setUser({
+        setCurrentUser({
           name: details.name,
           email: details.email,
         })

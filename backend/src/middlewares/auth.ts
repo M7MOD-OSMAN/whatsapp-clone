@@ -5,6 +5,8 @@ import { Socket } from "socket.io";
 import { ExtendedError } from "socket.io/dist/namespace";
 import { TextEncoder } from "util";
 import * as cookie from "cookie";
+import UserModel from "routes/users/model/model";
+import * as argon2 from "argon2";
 
 const encoder = new TextEncoder();
 const JWT_SECRET_KEY = encoder.encode(process.env["JWT_SECRET_KEY"]);
@@ -54,11 +56,14 @@ export async function authSocketioMiddleware(
     }
   }
 }
-const users = ["mohamad@hotmail.com", "ahmad@hotmail.com", "saleh@hotmail.com"];
 export async function login(req: Request, res: Response) {
   const email = req.body.email;
   const password = req.body.password;
-  if (users.includes(email) && password === "123456") {
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    return res.status(StatusCodes.UNAUTHORIZED).send();
+  }
+  if (await argon2.verify(user.password, password)) {
     const jwt = await new jose.SignJWT({})
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("2h")
