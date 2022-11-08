@@ -9,7 +9,7 @@ import { io, Socket } from "socket.io-client";
 import { nanoid } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
-import { resetUser } from "../store/user";
+import { resetCurrentUser } from "../store/user";
 
 interface Message {
   uuid: string;
@@ -24,7 +24,10 @@ const Chat = () => {
   const dispatch = useDispatch();
   const socketRef = useRef<Socket>();
   const currentUserEmail = useSelector(
-    (state: RootState) => state.currentUser.email
+    (state: RootState) => state.user.currentUser?.email
+  );
+  const currentReceiver = useSelector(
+    (state: RootState) => state.user.currentReceiver
   );
   useEffect(() => {
     socketRef.current = io(process.env.REACT_APP_SERVER_URL!, {
@@ -42,7 +45,7 @@ const Chat = () => {
     });
     socket.on("connect_error", (err) => {
       if (err.message === "auth_error") {
-        dispatch(resetUser());
+        dispatch(resetCurrentUser());
       }
     });
     return () => {
@@ -53,7 +56,7 @@ const Chat = () => {
     ev.preventDefault();
     const newMessage = {
       text: messageInput,
-      receiverEmail: currentUserEmail,
+      receiverEmail: currentReceiver?.email,
       uuid: nanoid(),
     } as Message;
     socketRef.current?.emit("message", newMessage);
@@ -65,7 +68,7 @@ const Chat = () => {
       <div className="chat-header">
         <Avatar />
         <div className="chat-headerInfo">
-          <h3>Room Name</h3>
+          <h3>{currentReceiver?.name ?? ""}</h3>
           <p>Last seen at...</p>
         </div>
 
