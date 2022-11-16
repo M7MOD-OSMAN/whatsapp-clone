@@ -1,21 +1,25 @@
 import { FormEvent, useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { setCurrentUser } from "../store/user";
 
 const Login = () => {
   const [error, setError] = useState("");
   const [details, setDetails] = useState({ name: "", email: "", password: "" });
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const login = async () => {
     try {
-      await axios.post("/login", details);
+      const response = await axios.post<string>("/login", details);
       dispatch(
         setCurrentUser({
+          id: response.data,
           name: details.name,
           email: details.email,
         })
       );
+      navigate("/");
     } catch (e) {
       setError("details do not match!");
     }

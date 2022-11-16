@@ -13,6 +13,7 @@
     "react/jsx-filename-extension": "off",
     "react/react-in-jsx-scope": "off",
     "react/function-component-definition": "off",
-    "no-param-reassign": "off"
+    "no-param-reassign": "off",
+    "react/jsx-props-no-spreading": "off"
   }
 }

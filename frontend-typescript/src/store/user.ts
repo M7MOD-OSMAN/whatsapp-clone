@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface User {
+  id: string;
   name: string;
   email: string;
 }
@@ -18,6 +19,7 @@ const userSlice = createSlice({
         state.currentUser.name = action.payload.name;
       } else {
         state.currentUser = {
+          id: action.payload.id,
           email: action.payload.email,
           name: action.payload.name,
         };

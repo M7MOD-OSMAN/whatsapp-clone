@@ -28,7 +28,10 @@ export async function authMiddleware(
   res: Response,
   next: NextFunction
 ) {
-  if (req.url.includes("login")) {
+  if (
+    req.path.includes("login") ||
+    (req.path === "/users" && req.method === "POST")
+  ) {
     return next();
   } else {
     await verifyToken(req, res, next);
@@ -69,7 +72,7 @@ export async function login(req: Request, res: Response) {
       .setExpirationTime("2h")
       .sign(JWT_SECRET_KEY);
     res.cookie("Token", jwt, { httpOnly: true, sameSite: "strict" });
-    return res.status(StatusCodes.OK).send();
+    return res.status(StatusCodes.OK).send(user.id);
   }
   return res.status(StatusCodes.UNAUTHORIZED).send();
 }
