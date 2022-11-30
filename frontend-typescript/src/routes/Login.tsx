@@ -1,20 +1,37 @@
 import { FormEvent, useState } from "react";
 import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setCurrentUser } from "../store/user";
 
+interface LoginInputs {
+  name: string;
+  email: string;
+  password: string;
+}
 const Login = () => {
   const [error, setError] = useState("");
-  const [details, setDetails] = useState({ name: "", email: "", password: "" });
+  const [details, setDetails] = useState<LoginInputs>({
+    name: "",
+    email: "",
+    password: "",
+  });
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const mutation = useMutation({
+    mutationFn: (inputs: LoginInputs) =>
+      axios
+        .post<string>("/users/login", inputs)
+        .then((response) => response.data),
+  });
+
   const login = async () => {
     try {
-      const response = await axios.post<string>("/login", details);
+      const response = await mutation.mutateAsync(details);
       dispatch(
         setCurrentUser({
-          id: response.data,
+          id: response,
           name: details.name,
           email: details.email,
         })

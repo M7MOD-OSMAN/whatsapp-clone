@@ -3,13 +3,9 @@ import { StatusCodes } from "http-status-codes";
 import * as jose from "jose";
 import { Socket } from "socket.io";
 import { ExtendedError } from "socket.io/dist/namespace";
-import { TextEncoder } from "util";
 import * as cookie from "cookie";
-import UserModel from "routes/users/model/model";
-import * as argon2 from "argon2";
+import { JWT_SECRET_KEY } from "@constants";
 
-const encoder = new TextEncoder();
-const JWT_SECRET_KEY = encoder.encode(process.env["JWT_SECRET_KEY"]);
 async function verifyToken(req: Request, res: Response, next: NextFunction) {
   const token = req.cookies["Token"];
   if (!token) {
@@ -58,21 +54,4 @@ export async function authSocketioMiddleware(
       return next(authError);
     }
   }
-}
-export async function login(req: Request, res: Response) {
-  const email = req.body.email;
-  const password = req.body.password;
-  const user = await UserModel.findOne({ email });
-  if (!user) {
-    return res.status(StatusCodes.UNAUTHORIZED).send();
-  }
-  if (await argon2.verify(user.password, password)) {
-    const jwt = await new jose.SignJWT({})
-      .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("2h")
-      .sign(JWT_SECRET_KEY);
-    res.cookie("Token", jwt, { httpOnly: true, sameSite: "strict" });
-    return res.status(StatusCodes.OK).send(user.id);
-  }
-  return res.status(StatusCodes.UNAUTHORIZED).send();
 }

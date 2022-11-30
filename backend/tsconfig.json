@@ -21,7 +21,8 @@
     "importHelpers": true,
     "baseUrl": "src",
     "paths": {
-      "@middlewares/*": ["middlewares/*"]
+      "@middlewares/*": ["middlewares/*"],
+      "@constants": ["./constants.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.json", ".env"],
